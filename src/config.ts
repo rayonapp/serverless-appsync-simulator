@@ -221,7 +221,8 @@ function resolveResources<T>(
   resources: AWS['resources'],
   resourceResolvers: ResourceResolvers,
 ): DeepResolved<T> {
-  // Pass all resources to allow Fn::GetAtt and Conditions resolution
+  try {
+    // Pass all resources to allow Fn::GetAtt and Conditions resolution
   const node = {
     ...resources,
     toBeResolved,
@@ -229,10 +230,13 @@ function resolveResources<T>(
   };
   const evaluator = new NodeEvaluator(node, resourceResolvers);
   const result = evaluator.evaluateNodes();
-  if (result && result.toBeResolved) {
-    return result.toBeResolved;
-  }
+    if (result && result.toBeResolved) {
+      return result.toBeResolved;
+    }
   return toBeResolved as DeepResolved<T>;
+  } catch (e) {
+    return toBeResolved as DeepResolved<T>;
+  }
 }
 
 export function buildAmplifyConfig(
